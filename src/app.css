@@ -295,32 +295,34 @@
 	}
 
 	.theme-everforest {
-		--background: 206 14% 20%;
+		/* Tone matched to OpenCode's everforest theme (neutral #2d353b, ink #d3c6aa,
+		   primary #a7c080, text-weak #7a8478). Surfaces use everforest bg1/bg2. */
+		--background: 206 13% 20%;
 		--foreground: 41 32% 75%;
 
-		--muted: 199 12% 26%;
-		--muted-foreground: 92 5% 53%;
+		--muted: 199 12% 24%;
+		--muted-foreground: 110 5% 49%;
 
-		--popover: 200 13% 23%;
+		--popover: 199 12% 24%;
 		--popover-foreground: 41 32% 75%;
 
-		--card: 200 13% 23%;
+		--card: 199 12% 24%;
 		--card-foreground: 41 32% 75%;
 
-		--border: 146 9% 29%;
-		--input: 146 9% 29%;
+		--border: 199 12% 27%;
+		--input: 199 12% 27%;
 
 		--primary: 83 34% 63%;
-		--primary-foreground: 206 14% 20%;
+		--primary-foreground: 206 13% 20%;
 
-		--secondary: 199 12% 26%;
+		--secondary: 199 12% 24%;
 		--secondary-foreground: 41 32% 75%;
 
-		--accent: 199 12% 26%;
+		--accent: 199 12% 24%;
 		--accent-foreground: 41 32% 75%;
 
 		--destructive: 359 68% 70%;
-		--destructive-foreground: 206 14% 20%;
+		--destructive-foreground: 206 13% 20%;
 
 		--ring: 83 34% 63%;
 		--radius: 0.625rem;
