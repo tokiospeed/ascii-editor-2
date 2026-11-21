@@ -1,0 +1,332 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import CanvasKitInit from 'canvaskit-wasm';
+	import { App, createAppInstance } from '@editor/app';
+	import { type ConfigTheme } from '@editor/config';
+	import { Camera } from '@editor/camera';
+	import {
+		DrawTool,
+		EraserTool,
+		SelectTool,
+		DrawShapeTool,
+		TextTool,
+		ImageTool,
+		HistoryControlTool,
+		ContextMenuTool
+	} from '@editor/tools';
+	import { CameraControlTool } from '@editor/tools/camera-control';
+	import { useTheme } from '@/theme/useTheme';
+	import type { FontData } from '@editor/font';
+	import { loader } from '@lib/load/load-manager';
+	import wasmUrl from 'canvaskit-wasm/bin/canvaskit.wasm?url';
+	import ConfigProvider from '@/config/ConfigProvider.svelte';
+	import Notifier from '@views/Notifier/Notifier.svelte';
+	import Tools from '@views/Tools/Tools.svelte';
+	import SideMenu from '@views/SideMenu/SideMenu.svelte';
+	import Actions from '@views/Actions/Actions.svelte';
+	import EditorContextMenu from '@views/ContextMenu/EditorContextMenu.svelte';
+	import type { CoreApi } from '@editor/core';
+	import { registerDefaultCommands } from '@editor/commands/register-default';
+
+	import CoreProvider from '@/config/CoreProvider.svelte';
+	import { ExportTool } from '@editor/tools/export/export-tool';
+	import { ScreenshotTool } from '@editor/tools/screenshot/screenshot-tool';
+	import type { Theme } from '@/theme';
+	import { RectangleObject } from '@editor/tools/shape/rectangle-object';
+	import { LineObject } from '@editor/tools/shape/line-object';
+	import { ElbowArrowObject } from '@editor/tools/shape/elbow-arrow-object';
+	import { ImageAsciiObject } from '@editor/tools/image/image-ascii-object';
+	import { Project } from '@/project/project';
+	import { useDispatch } from '@store/useDispatch';
+	import { useSelector } from '@store/useSelector';
+	import { toggleGrid, toggleUI } from '@store/slices/ui/ui.slice';
+	import { EditorCommand } from '@editor/commands/ids';
+	import { contextMenuService } from '@/views/ContextMenu/service-instance';
+	import type { MenuContext } from '@editor/context-menu';
+	import { registerProjectCommands } from '@editor/commands/project-commands';
+	import { getDocument } from '@store/slices/document';
+	import PropertiesPanel from '@views/PropertiesPanel/PropertiesPanel.svelte';
+
+	const { theme, currentThemeRGBA } = useTheme();
+	const dispatch = useDispatch();
+	const uiVisible = useSelector((state) => state.ui.visible);
+	const gridVisible = useSelector((state) => state.ui.gridVisible);
+
+	const editorThemes: Record<Theme, ConfigTheme> = {
+		light: {
+			background: [1, 1, 1, 1.0],
+			grid: [0.9, 0.9, 0.9, 1.0],
+			foreground: [0, 0, 0, 1.0],
+			primary: [0.231, 0.51, 0.965, 1]
+		},
+		dark: {
+			background: [0.1, 0.1, 0.1, 1.0],
+			grid: [0.2, 0.2, 0.2, 1.0],
+			foreground: [1, 1, 1, 1.0],
+			primary: [0.231, 0.51, 0.965, 1]
+		},
+		dracula: {
+			background: [0.157, 0.165, 0.212, 1.0],
+			grid: [0.267, 0.278, 0.353, 1.0],
+			foreground: [0.973, 0.973, 0.949, 1.0],
+			primary: [0.741, 0.576, 0.976, 1]
+		},
+		nord: {
+			background: [0.18, 0.204, 0.251, 1.0],
+			grid: [0.298, 0.337, 0.416, 1.0],
+			foreground: [0.925, 0.937, 0.957, 1.0],
+			primary: [0.533, 0.753, 0.816, 1]
+		},
+		'tokyo-night': {
+			background: [0.102, 0.106, 0.149, 1.0],
+			grid: [0.184, 0.2, 0.302, 1.0],
+			foreground: [0.753, 0.792, 0.961, 1.0],
+			primary: [0.478, 0.635, 0.969, 1]
+		},
+		solarized: {
+			background: [0.992, 0.965, 0.89, 1.0],
+			grid: [0.933, 0.91, 0.835, 1.0],
+			foreground: [0.396, 0.482, 0.514, 1.0],
+			primary: [0.149, 0.545, 0.824, 1]
+		},
+		'catppuccin-latte': {
+			background: [0.937, 0.945, 0.961, 1.0],
+			grid: [0.8, 0.816, 0.855, 1.0],
+			foreground: [0.298, 0.31, 0.412, 1.0],
+			primary: [0.533, 0.224, 0.937, 1]
+		},
+		'gruvbox-light': {
+			background: [0.984, 0.945, 0.78, 1.0],
+			grid: [0.835, 0.769, 0.631, 1.0],
+			foreground: [0.235, 0.22, 0.212, 1.0],
+			primary: [0.027, 0.4, 0.471, 1]
+		}
+	};
+
+	let core: CoreApi;
+	$: if (core) {
+		core.getUI().toggleGrid($gridVisible);
+	}
+	let currentProject: Project | null = null;
+
+	onMount(async () => {
+		const loadPromise = (async () => {
+			const ckLoaded = CanvasKitInit({
+				locateFile: () => wasmUrl
+			});
+
+			let canvasContainer = document.getElementById('canvas-container');
+
+			const gridCanvas = document.querySelector('#grid-canvas') as HTMLCanvasElement;
+			gridCanvas.width = canvasContainer!.clientWidth;
+			gridCanvas.height = canvasContainer!.clientHeight;
+
+			const selectCanvas = document.querySelector('#selection-canvas') as HTMLCanvasElement;
+			selectCanvas.width = canvasContainer!.clientWidth;
+			selectCanvas.height = canvasContainer!.clientHeight;
+
+			const animationCanvas = document.querySelector('#animation-canvas') as HTMLCanvasElement;
+			animationCanvas.width = canvasContainer!.clientWidth;
+			animationCanvas.height = canvasContainer!.clientHeight;
+
+			[canvasContainer, gridCanvas, selectCanvas, animationCanvas].map((item) =>
+				item!.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				})
+			);
+
+			ckLoaded.then(async (canvasKit) => {
+				async function loadFont(url: string, family: string): Promise<FontData> {
+					const response = await fetch(url);
+					if (!response.ok) {
+						throw new Error(`Failed to load font from ${url}`);
+					}
+
+					const buffer = await response.arrayBuffer();
+					return { buffer, family };
+				}
+
+				const ratio = window.devicePixelRatio || 1;
+				const camera = new Camera(
+					canvasContainer!.clientWidth * ratio,
+					canvasContainer!.clientHeight * ratio
+				);
+
+				let app: App;
+
+				function resizeCanvases() {
+					if (!canvasContainer) return;
+					const width = canvasContainer.clientWidth;
+					const height = canvasContainer.clientHeight;
+
+					if (width === 0 || height === 0) return;
+
+					const ratio = window.devicePixelRatio || 1;
+
+					[gridCanvas, selectCanvas, animationCanvas].forEach((canvas) => {
+						canvas.width = width * ratio;
+						canvas.height = height * ratio;
+						canvas.style.width = `${width}px`;
+						canvas.style.height = `${height}px`;
+					});
+
+					camera.setDimensions(width * ratio, height * ratio);
+					app?.resizeCanvases();
+				}
+
+				resizeCanvases();
+				window.addEventListener('resize', resizeCanvases);
+				window
+					.matchMedia('screen and (resolution: 1dppx)')
+					.addEventListener('change', resizeCanvases);
+
+				const font = await loadFont('/fonts/LiberationMono-Regular.ttf', 'Liberation Mono');
+
+				const [coreApi, appInstance] = createAppInstance({
+					canvasKitInstance: canvasKit,
+					camera,
+					gridCanvasElement: gridCanvas,
+					selectCanvasElement: selectCanvas,
+					asciiCanvasElement: animationCanvas,
+					font
+				});
+
+				core = coreApi;
+
+				app = appInstance;
+
+				const documentId = '__PROJECT__';
+				currentProject = new Project(documentId, coreApi);
+
+				const toolExport = new ExportTool(coreApi);
+				const toolScreenshot = new ScreenshotTool(coreApi);
+
+				const updateTheme = (theme: Theme) => {
+					app.getConfig().setTheme({
+						...app.getConfig().getTheme(),
+						...editorThemes[theme]
+					});
+
+					toolExport.setTheme({
+						primary: $currentThemeRGBA['--primary-export']
+					});
+				};
+
+				updateTheme($theme);
+
+				const drawTool = new DrawTool(coreApi);
+				const eraserTool = new EraserTool(coreApi);
+				const selectTool = new SelectTool(coreApi);
+				const drawShapeTool = new DrawShapeTool(coreApi);
+				const textTool = new TextTool(coreApi);
+				const imageTool = new ImageTool(coreApi);
+				const historyControlTool = new HistoryControlTool(coreApi);
+				const cameraControlTool = new CameraControlTool(coreApi);
+				const contextMenuTool = new ContextMenuTool(coreApi);
+
+				app.registerTool(selectTool);
+				app.registerTool(drawTool);
+				app.registerTool(eraserTool);
+				app.registerTool(drawShapeTool);
+				app.registerTool(textTool);
+				app.registerTool(imageTool);
+				app.registerTool(historyControlTool);
+				app.registerTool(cameraControlTool);
+				app.registerTool(toolExport);
+				app.registerTool(toolScreenshot);
+				app.registerTool(contextMenuTool);
+
+				app.registerObject('rectangle', RectangleObject);
+				app.registerObject('line', LineObject);
+				app.registerObject('elbow-arrow', ElbowArrowObject);
+				app.registerObject('image-ascii', ImageAsciiObject);
+
+				registerDefaultCommands(core.getCommands(), core);
+
+				core.getCommandRegistry().register(EditorCommand.ViewToggleUI, () => dispatch(toggleUI()));
+				core
+					.getCommandRegistry()
+					.register(EditorCommand.ViewToggleGrid, () => dispatch(toggleGrid()));
+				core.getCommandRegistry().register(EditorCommand.ViewThemeSet, (args: unknown) => {
+					const _args = args as { theme: Theme };
+					if (_args && _args.theme) {
+						theme.set(_args.theme);
+					}
+				});
+
+				core.getCommandRegistry().register(EditorCommand.ViewShowContextMenu, (args: unknown) => {
+					const _args = args as { x: number; y: number; context: MenuContext };
+					contextMenuService.showAt(_args.x, _args.y, _args.context);
+				});
+
+				registerProjectCommands(core.getCommandRegistry(), {
+					core: coreApi,
+					documentId,
+					getCurrentProject: () => currentProject,
+					setCurrentProject: (p) => { currentProject = p; },
+					onImport: () => dispatch(getDocument(documentId))
+				});
+
+				const toolManager = app.getToolManager();
+				toolManager.setDefaultTool(selectTool);
+
+				theme.subscribe((theme) => {
+					updateTheme(theme);
+				});
+
+				currentProject.startSyncing();
+
+				window.addEventListener('resize', () => app.render());
+				app.hydratateDocument(currentProject.documentSchema());
+				app.render();
+			});
+		})();
+		loader.register([loadPromise]);
+	});
+</script>
+
+<main>
+	<div role="main" id="canvas-container">
+		<canvas id="grid-canvas" width="1920" height="1080"></canvas>
+		<canvas id="animation-canvas" width="1920" height="1080"></canvas>
+		<canvas id="selection-canvas" width="1920" height="1080"></canvas>
+	</div>
+</main>
+
+{#if core}
+	<CoreProvider coreApi={core}>
+		<ConfigProvider config={core.getConfig()}>
+			<EditorContextMenu />
+			<div class={$uiVisible ? 'contents' : 'hidden'}>
+				<Notifier />
+				<Tools />
+				<SideMenu />
+				<Actions />
+				<PropertiesPanel />
+			</div>
+		</ConfigProvider>
+	</CoreProvider>
+{/if}
+
+<style>
+	#canvas-container {
+		position: relative;
+		width: 100vw;
+		height: 100vh;
+		user-select: none;
+		background-color: hsl(--primary-foreground);
+	}
+	canvas {
+		position: absolute;
+		top: 0;
+
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+		transform-origin: top left;
+		cursor: inherit;
+	}
+</style>
