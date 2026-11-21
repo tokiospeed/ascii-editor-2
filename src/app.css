@@ -222,7 +222,7 @@
 		--primary-export: 205 69% 49%;
 	}
 
-	.catppuccin-latte-theme {
+	.theme-catppuccin-latte {
 		--background: 220 23% 95%;
 		--foreground: 234 16% 36%;
 
@@ -258,7 +258,7 @@
 		--primary-export: 266 85% 58%;
 	}
 
-	.gruvbox-light-theme {
+	.theme-gruvbox-light {
 		--background: 48 86% 88%;
 		--foreground: 20 5% 22%;
 

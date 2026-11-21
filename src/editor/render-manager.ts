@@ -178,10 +178,15 @@ export class RenderManager implements IRenderManager {
 
 		this.isRendering = true;
 		this.animationFrameId = requestAnimationFrame(() => {
-			const surfacesToFlush = this.performRender();
-			this.flushSurfaces(surfacesToFlush);
-			this.isRendering = false;
-			this.animationFrameId = null;
+			try {
+				const surfacesToFlush = this.performRender();
+				this.flushSurfaces(surfacesToFlush);
+			} finally {
+				// A throwing render callback must never permanently freeze the
+				// render loop (this.isRendering stuck = no renders ever again).
+				this.isRendering = false;
+				this.animationFrameId = null;
+			}
 		});
 	}
 
@@ -215,13 +220,18 @@ export class RenderManager implements IRenderManager {
 			if (registeredEntry) {
 				const { callback, canvas } = registeredEntry;
 
-				const componentSubs = this.componentSubscribers.get(key);
-				if (componentSubs) {
-					for (const [compCb] of componentSubs) compCb();
-				}
-				for (const [anyCompCb] of this.anyComponentSubscribers) anyCompCb();
+				try {
+					const componentSubs = this.componentSubscribers.get(key);
+					if (componentSubs) {
+						for (const [compCb] of componentSubs) compCb();
+					}
+					for (const [anyCompCb] of this.anyComponentSubscribers) anyCompCb();
 
-				callback();
+					callback();
+				} catch (e) {
+					// One broken renderer must not skip the rest of the frame.
+					console.error(`Render callback failed for "${key}":`, e);
+				}
 
 				if (canvas && canvas.surface && !canvas.surface.isDeleted()) {
 					surfacesToFlushThisFrame.add(canvas.surface);

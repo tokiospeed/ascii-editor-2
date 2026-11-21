@@ -209,9 +209,10 @@
 						...editorThemes[theme]
 					});
 
-					toolExport.setTheme({
-						primary: $currentThemeRGBA['--primary-export']
-					});
+					const exportPrimary = $currentThemeRGBA['--primary-export'];
+					if (exportPrimary) {
+						toolExport.setTheme({ primary: exportPrimary });
+					}
 				};
 
 				updateTheme($theme);
