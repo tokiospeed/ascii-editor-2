@@ -1,13 +1,14 @@
 # ASCII Editor
 
-[![CI](https://github.com/dnisdv/ascii-editor/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/dnisdv/ascii-editor/actions/workflows/lint-and-test.yml)
+[![CI](https://github.com/latent-9/ascii-editor-2/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/latent-9/ascii-editor-2/actions/workflows/lint-and-test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://ascii-editor-2.vercel.app)
 
 ![ASCII Editor Cover](media/Github_Thumbnail.gif)
 
 **ASCII Editor** is a browser-based ASCII art editor built with **SvelteKit** and **CanvasKit (Skia + WebAssembly)**. Create, edit, and manage ASCII-based designs with a structured layer system and a familiar creative tool set.
 
-**[Try it live at dnascii.com](https://dnascii.com)**
+**[Try it live at ascii-editor-2.vercel.app](https://ascii-editor-2.vercel.app)**
 
 ---
 
