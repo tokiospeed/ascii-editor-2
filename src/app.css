@@ -293,6 +293,42 @@
 		--canvas-background: 0 0% 98%;
 		--primary-export: 190 89% 25%;
 	}
+
+	.theme-everforest {
+		--background: 206 14% 20%;
+		--foreground: 41 32% 75%;
+
+		--muted: 199 12% 26%;
+		--muted-foreground: 92 5% 53%;
+
+		--popover: 200 13% 23%;
+		--popover-foreground: 41 32% 75%;
+
+		--card: 200 13% 23%;
+		--card-foreground: 41 32% 75%;
+
+		--border: 146 9% 29%;
+		--input: 146 9% 29%;
+
+		--primary: 83 34% 63%;
+		--primary-foreground: 206 14% 20%;
+
+		--secondary: 199 12% 26%;
+		--secondary-foreground: 41 32% 75%;
+
+		--accent: 199 12% 26%;
+		--accent-foreground: 41 32% 75%;
+
+		--destructive: 359 68% 70%;
+		--destructive-foreground: 206 14% 20%;
+
+		--ring: 83 34% 63%;
+		--radius: 0.625rem;
+
+		/* custom */
+		--canvas-background: 0 0% 98%;
+		--primary-export: 83 34% 63%;
+	}
 }
 
 @layer base {

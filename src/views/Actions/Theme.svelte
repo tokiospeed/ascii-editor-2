@@ -17,7 +17,8 @@
 		'tokyo-night': 'torii',
 		solarized: 'sunrise',
 		'catppuccin-latte': 'cat',
-		'gruvbox-light': 'vinyl'
+		'gruvbox-light': 'vinyl',
+		everforest: 'tree'
 	};
 
 	function nextTheme(): Theme {

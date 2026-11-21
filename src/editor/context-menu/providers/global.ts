@@ -106,6 +106,14 @@ export function createGlobalContextMenuProvider(): ContextMenuProvider {
 						selected: false,
 						commandId: MenuId.ViewThemeSet,
 						args: { theme: 'gruvbox-light' }
+					}),
+					menu.radio(MenuId.ViewThemeEverforest, {
+						groupId: 'theme',
+						value: 'everforest',
+						labelKey: LabelKey.ViewThemeEverforest,
+						selected: false,
+						commandId: MenuId.ViewThemeSet,
+						args: { theme: 'everforest' }
 					})
 				],
 				{ group: MenuGroup.View }

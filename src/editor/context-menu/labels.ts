@@ -39,6 +39,7 @@ export const LabelKey = {
 	ViewThemeSolarized: 'menu.view.theme.solarized',
 	ViewThemeCatppuccinLatte: 'menu.view.theme.catppuccin-latte',
 	ViewThemeGruvboxLight: 'menu.view.theme.gruvbox-light',
+	ViewThemeEverforest: 'menu.view.theme.everforest',
 
 	LayerRasterize: 'menu.layer.rasterize'
 } as const;

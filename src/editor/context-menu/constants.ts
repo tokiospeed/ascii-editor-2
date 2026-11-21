@@ -50,6 +50,7 @@ export const MenuId = {
 	ViewThemeSolarized: 'view.theme.solarized',
 	ViewThemeCatppuccinLatte: 'view.theme.catppuccin-latte',
 	ViewThemeGruvboxLight: 'view.theme.gruvbox-light',
+	ViewThemeEverforest: 'view.theme.everforest',
 
 	LayerGroup: 'layer.group',
 	LayerUngroup: 'layer.ungroup',

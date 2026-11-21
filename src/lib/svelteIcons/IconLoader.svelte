@@ -33,6 +33,7 @@
 		cat: () => import('./Cat.svelte'),
 		vinyl: () => import('./Vinyl.svelte'),
 		camera: () => import('./Camera.svelte'),
+		tree: () => import('./Tree.svelte'),
 		rectangle: () => import('./Rectangle.svelte'),
 		line: () => import('./Line.svelte'),
 		'eye-closed': () => import('./EyeClosed.svelte'),

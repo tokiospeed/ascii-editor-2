@@ -46,7 +46,8 @@ export type Theme =
 	| 'tokyo-night'
 	| 'solarized'
 	| 'catppuccin-latte'
-	| 'gruvbox-light';
+	| 'gruvbox-light'
+	| 'everforest';
 export type CssThemeVariables = { [key: string]: string };
 export type RgbaThemeVariables = { [key: string]: [number, number, number, number] };
 export type HexThemeVariables = { [key: string]: string };

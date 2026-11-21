@@ -11,11 +11,12 @@ export const THEMES: Theme[] = [
 	'tokyo-night',
 	'solarized',
 	'catppuccin-latte',
-	'gruvbox-light'
+	'gruvbox-light',
+	'everforest'
 ];
 
 /** Themes that must also toggle Tailwind's `dark` class on <body>. */
-export const DARK_THEMES: Theme[] = ['dark', 'dracula', 'nord', 'tokyo-night'];
+export const DARK_THEMES: Theme[] = ['dark', 'dracula', 'nord', 'tokyo-night', 'everforest'];
 
 /** Human readable display names per theme. */
 export const THEME_LABELS: Record<Theme, string> = {
@@ -26,5 +27,6 @@ export const THEME_LABELS: Record<Theme, string> = {
 	'tokyo-night': 'Tokyo Night',
 	solarized: 'Solarized',
 	'catppuccin-latte': 'Catppuccin Latte',
-	'gruvbox-light': 'Gruvbox Light'
+	'gruvbox-light': 'Gruvbox Light',
+	everforest: 'Everforest'
 };

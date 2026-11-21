@@ -34,6 +34,7 @@ export const en = {
 	'menu.view.theme.solarized': 'Solarized',
 	'menu.view.theme.catppuccin-latte': 'Catppuccin Latte',
 	'menu.view.theme.gruvbox-light': 'Gruvbox Light',
+	'menu.view.theme.everforest': 'Everforest',
 
 	'menu.layer.rasterize': 'Rasterize'
 };
